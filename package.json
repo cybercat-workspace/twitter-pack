@@ -8,7 +8,7 @@
     "access": "public"
   },
   "repository": "git@github.com:cybercat-workspace/twitter-pack.git",
-  "author": "Jay Chen <gcobs135102@gmail.com>",
+  "author": "CyberCat-Studio",
   "contributors": [
     "Jay Chen (https://github.com/Jay0328)"
   ],
@@ -20,8 +20,7 @@
     "twitter api",
     "node-twitter",
     "twitter oauth",
-    "twitter rest",
-    "twitter stream"
+    "twitter rest"
   ],
   "scripts": {
     "format": "prettier './**/*.{js,ts,json,md}' --write",
