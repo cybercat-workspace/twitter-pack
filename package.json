@@ -29,10 +29,11 @@
     "test:coverage": "jest --coverage",
     "test": "jest",
     "commit": "git-cz",
-    "build:clean": "",
-    "build": "",
+    "sync-dist": "rsync -ar --exclude=dist/ --exclude-from=.npmignore ./ ./dist",
+    "build:clean": "rm -rf ./dist",
+    "build": "npm run build:clean && tsc --project ./tsconfig.app.json && tsc --project ./tsconfig.app.json -m esnext -outDir ./dist/esm && npm run sync-dist",
     "release": "standard-version",
-    "publish": "npm run build:clean && npm run release && npm run build && npm publish && git push && git push --tags"
+    "publish": "npm run release && npm run build && npm publish ./dist && git push && git push --tags"
   },
   "dependencies": {
     "node-fetch": "^2.6.1",
