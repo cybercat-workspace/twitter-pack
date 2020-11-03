@@ -34,14 +34,20 @@
     "release": "standard-version",
     "publish": "npm run build:clean && npm run release && npm run build && npm publish && git push && git push --tags"
   },
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "oauth-1.0a": "^2.2.6"
+  },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@types/jest": "^26.0.15",
+    "@types/node-fetch": "^2.5.7",
     "@typescript-eslint/eslint-plugin": "^4.6.0",
     "@typescript-eslint/parser": "^4.6.0",
     "commitizen": "^4.2.2",
     "cz-conventional-changelog": "^3.3.0",
+    "dotenv": "^8.2.0",
     "eslint": "^7.12.1",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
