@@ -32,8 +32,7 @@
     "sync-dist": "rsync -ar --exclude=dist/ --exclude-from=.npmignore ./ ./dist",
     "build:clean": "rm -rf ./dist",
     "build": "npm run build:clean && tsc --project ./tsconfig.app.json && tsc --project ./tsconfig.app.json -m esnext -outDir ./dist/esm && npm run sync-dist",
-    "release:version": "standard-version",
-    "release": "npm run release:version && npm run build && npm publish ./dist && git push && git push --tags"
+    "release": "standard-version && npm run build && npm publish ./dist && git push && git push --tags"
   },
   "dependencies": {
     "node-fetch": "^2.6.1",
