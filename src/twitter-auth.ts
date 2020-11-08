@@ -1,5 +1,6 @@
 import querystring from 'querystring';
 import fetch from 'node-fetch';
+import { ResponseResult } from './typings';
 import {
   TwitterAccessTokenResponse,
   TwitterBearerTokenResponse,
@@ -7,7 +8,7 @@ import {
   TwitterGetRequestTokenAndAuthenticateUrlParamters,
   TwitterRequestTokenResponse,
   TwitterRequestTokenResponseAndAuthenticateUrl
-} from './typings';
+} from './twitter.typings';
 import { OAuth } from './oauth-1.0a';
 import { getTwitterUrl } from './get-twitter-url';
 import { handleResponse, handleResponseTextOrJson } from './response-handlers';
@@ -26,7 +27,7 @@ export class TwitterAuth {
     this.subdomain = subdomain;
   }
 
-  getBearerToken(): Promise<TwitterBearerTokenResponse> {
+  getBearerToken<E = any>(): Promise<ResponseResult<TwitterBearerTokenResponse, E>> {
     const { key, secret } = this.oauth.consumer;
     const hash = Buffer.from(`${key}:${secret}`).toString('base64');
     const headers = {
@@ -41,7 +42,9 @@ export class TwitterAuth {
     }).then(handleResponse);
   }
 
-  getRequestToken(twitterCallbackUrl: string | 'oob'): Promise<TwitterRequestTokenResponse> {
+  getRequestToken<E = any>(
+    twitterCallbackUrl: string | 'oob'
+  ): Promise<ResponseResult<TwitterRequestTokenResponse, E>> {
     const query = twitterCallbackUrl ? `?${querystring.stringify({ oauth_callback: twitterCallbackUrl })}` : '';
     const requestData = {
       url: `${this.url}/request_token${query}`,
@@ -62,23 +65,33 @@ export class TwitterAuth {
   /**
    * @see {https://developer.twitter.com/en/docs/authentication/api-reference/authenticate}
    */
-  async getRequestTokenAndAuthenticateUrl(
+  async getRequestTokenAndAuthenticateUrl<E = any>(
     twitterCallbackUrl: string | 'oob',
     parameters: TwitterGetRequestTokenAndAuthenticateUrlParamters = {}
-  ): Promise<TwitterRequestTokenResponseAndAuthenticateUrl> {
-    const result = await this.getRequestToken(twitterCallbackUrl);
-    const query = querystring.stringify({
-      ...parameters,
-      oauth_token: result.oauth_token
-    });
+  ): Promise<ResponseResult<TwitterRequestTokenResponseAndAuthenticateUrl, E>> {
+    const { data, error } = await this.getRequestToken(twitterCallbackUrl);
 
-    return {
-      ...result,
-      authenticateUrl: `${getTwitterUrl('api', 'oauth/authenticate')}?${query}`
-    };
+    if (data) {
+      const query = querystring.stringify({
+        ...parameters,
+        oauth_token: data.oauth_token
+      });
+
+      return {
+        data: {
+          ...data,
+          authenticateUrl: `${getTwitterUrl('api', 'oauth/authenticate')}?${query}`
+        },
+        error: undefined
+      };
+    } else {
+      return { error };
+    }
   }
 
-  getAccessToken(options: TwitterGetAccessTokenOptions): Promise<TwitterAccessTokenResponse> {
+  getAccessToken<E = any>(
+    options: TwitterGetAccessTokenOptions
+  ): Promise<ResponseResult<TwitterAccessTokenResponse, E>> {
     const { oauth_verifier, oauth_token } = options;
     const qs =
       oauth_verifier && oauth_token

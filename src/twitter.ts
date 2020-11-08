@@ -1,6 +1,6 @@
-import { TwitterOptions } from './typings';
 import { OAuth } from './oauth-1.0a';
 import { DEFAULT_TWITTER_SUBDOMAIN, DEFAULT_TWITTER_VERSION } from './constants';
+import { TwitterOptions } from './twitter.typings';
 import { TwitterAuth } from './twitter-auth';
 import { TwitterClient } from './twitter-client';
 

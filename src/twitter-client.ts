@@ -1,5 +1,6 @@
 import querystring from 'querystring';
 import fetch, { RequestInit } from 'node-fetch';
+import { ResponseResult } from './typings';
 import { OAuth } from './oauth-1.0a';
 import { JSON_ENDPOINTS } from './constants';
 import { handleResponse } from './response-handlers';
@@ -88,7 +89,7 @@ export class TwitterClient {
    * @param resource - endpoint, e.g. `followers/ids`
    * @returns Promise resolving to the response from the Twitter API.
    */
-  get<T = any>(resource: string, parameters?: Record<string, any>): Promise<T> {
+  get<D = any, E = any>(resource: string, parameters?: Record<string, any>): Promise<ResponseResult<D, E>> {
     return this._request('GET', resource, headers => ({ headers }), parameters);
   }
 
@@ -98,7 +99,7 @@ export class TwitterClient {
    * @param body - POST parameters object. Will be encoded appropriately (JSON or urlencoded) based on the resource
    * @returns Promise resolving to the response from the Twitter API.
    */
-  post<T = any>(resource: string, body?: Record<string, any>): Promise<T> {
+  post<D = any, E = any>(resource: string, body?: Record<string, any>): Promise<ResponseResult<D, E>> {
     const isJsonEndpoint = JSON_ENDPOINTS.includes(resource);
     /**
      * Don't sign JSON bodies. Only parameters
@@ -139,7 +140,11 @@ export class TwitterClient {
    * @param parameters - required or optional query parameters
    * @param body - PUT request body
    */
-  put<T = any>(resource: string, parameters: Record<string, any> = {}, body: Record<string, any> = {}): Promise<T> {
+  put<D = any, E = any>(
+    resource: string,
+    parameters: Record<string, any> = {},
+    body: Record<string, any> = {}
+  ): Promise<ResponseResult<D, E>> {
     return this._request(
       'PUT',
       resource,
@@ -168,7 +173,11 @@ export class TwitterClient {
    * @param parameters - required or optional query parameters
    * @param body - DELETE request body
    */
-  delete<T = any>(resource: string, parameters: Record<string, any> = {}, body: Record<string, any> = {}): Promise<T> {
+  delete<D = any, E = any>(
+    resource: string,
+    parameters: Record<string, any> = {},
+    body: Record<string, any> = {}
+  ): Promise<ResponseResult<D, E>> {
     return this._request(
       'DELETE',
       resource,
