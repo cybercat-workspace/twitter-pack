@@ -23,7 +23,7 @@ function isNotEmptyObject(obj: Record<string, any> | undefined): obj is Record<s
   return !!(obj && Object.keys(obj).length);
 }
 
-export class TwitterClient {
+export class TwitterApi {
   private readonly oauth: OAuth;
   private readonly subdomain: string;
   private readonly version: string;

@@ -37,11 +37,11 @@ describe('configuration', () => {
   });
 
   it('should return the API URL', () => {
-    expect(new Twitter({ consumer }).client.url).toEqual('https://api.twitter.com/1.1');
+    expect(new Twitter({ consumer }).api.url).toEqual('https://api.twitter.com/1.1');
   });
 
   it('should return a stream API URL', () => {
-    expect(new Twitter({ consumer, subdomain: 'stream' }).client.url).toEqual('https://stream.twitter.com/1.1');
+    expect(new Twitter({ consumer, subdomain: 'stream' }).api.url).toEqual('https://stream.twitter.com/1.1');
   });
 });
 
@@ -59,7 +59,7 @@ describe('auth', () => {
     expect.assertions(1);
 
     try {
-      await twitter.client.get('account/verify_credentials');
+      await twitter.api.get('account/verify_credentials');
     } catch (e) {
       expect(e).toMatchObject({
         errors: [{ code: 32, message: 'Could not authenticate you.' }]
@@ -82,7 +82,7 @@ describe('auth', () => {
 
     expect.assertions(1);
     try {
-      await twitter.client.get('account/verify_credentials');
+      await twitter.api.get('account/verify_credentials');
     } catch (e) {
       expect(e).toMatchObject({
         errors: [{ code: 89, message: 'Invalid or expired token.' }]
@@ -92,7 +92,7 @@ describe('auth', () => {
 
   it('should verify credentials with correct tokens', async () => {
     const twitter = new Twitter({ consumer, accessToken });
-    const response = await twitter.client.get('account/verify_credentials');
+    const response = await twitter.api.get('account/verify_credentials');
     expect(response).toHaveProperty('screen_name');
   });
 
@@ -106,7 +106,7 @@ describe('auth', () => {
       consumer,
       bearerToken: response.access_token
     });
-    const rateLimits = await twitter.client.get('application/rate_limit_status', {
+    const rateLimits = await twitter.api.get('application/rate_limit_status', {
       resources: 'statuses'
     });
     // This rate limit is 75 for user auth and 300 for app auth
@@ -122,7 +122,7 @@ describe('posting', () => {
     const message = randomString(); // prevent overzealous abuse detection
 
     // POST with JSON body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event
-    const response = await twitter.client.post('direct_messages/events/new', {
+    const response = await twitter.api.post('direct_messages/events/new', {
       event: {
         type: 'message_create',
         message_create: {
@@ -153,7 +153,7 @@ describe('posting', () => {
 
   it('should send typing indicator and parse empty response', async () => {
     // https://developer.twitter.com/en/docs/direct-messages/typing-indicator-and-read-receipts/api-reference/new-typing-indicator
-    const response = await twitter.client.post('direct_messages/indicate_typing', {
+    const response = await twitter.api.post('direct_messages/indicate_typing', {
       recipient_id: DIRECT_MESSAGE_RECIPIENT_ID
     });
     expect(response).toEqual({ _headers: expect.any(Object) });
@@ -163,7 +163,7 @@ describe('posting', () => {
     const message = randomString(); // prevent overzealous abuse detection
 
     // https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
-    const response = await twitter.client.post('statuses/update', {
+    const response = await twitter.api.post('statuses/update', {
       status: STRING_WITH_SPECIAL_CHARS + message + STRING_WITH_SPECIAL_CHARS
     });
 
@@ -171,7 +171,7 @@ describe('posting', () => {
       text: htmlEscape(STRING_WITH_SPECIAL_CHARS + message + STRING_WITH_SPECIAL_CHARS)
     });
     const id = response.id_str;
-    const deleted = await twitter.client.post('statuses/destroy', {
+    const deleted = await twitter.api.post('statuses/destroy', {
       id
     });
     expect(deleted).toMatchObject({
@@ -187,7 +187,7 @@ describe('uploading', () => {
   it('should upload a picture, and add alt text to it', async () => {
     // Upload picture
     const base64Image = new Buffer(TEST_IMAGE).toString('base64');
-    const mediaUploadResponse = await twitter.client.post('media/upload', {
+    const mediaUploadResponse = await twitter.api.post('media/upload', {
       media_data: base64Image
     });
     expect(mediaUploadResponse).toMatchObject({
@@ -196,7 +196,7 @@ describe('uploading', () => {
 
     // Set alt text
     const imageAltString = 'Animated picture of a dancing banana';
-    await twitter.client.post('media/metadata/create', {
+    await twitter.api.post('media/metadata/create', {
       media_id: mediaUploadResponse.media_id_string,
       alt_text: { text: imageAltString }
     });
@@ -211,7 +211,7 @@ describe('putting', () => {
    * and your demo app needs to have access to read, write, and direct messages.
    */
   it('can update welcome message', async () => {
-    const newWelcomeMessage = await twitter.client.post('direct_messages/welcome_messages/new', {
+    const newWelcomeMessage = await twitter.api.post('direct_messages/welcome_messages/new', {
       welcome_message: {
         name: 'simple_welcome-message 01',
         message_data: {
@@ -220,7 +220,7 @@ describe('putting', () => {
       }
     });
 
-    const updatedWelcomeMessage = await twitter.client.put(
+    const updatedWelcomeMessage = await twitter.api.put(
       'direct_messages/welcome_messages/update',
       {
         id: newWelcomeMessage.welcome_message.id
@@ -241,7 +241,7 @@ describe('misc', () => {
   beforeAll(() => (twitter = new Twitter({ consumer, accessToken })));
 
   it('should get full text of retweeted tweet', async () => {
-    const response = await twitter.client.get('statuses/show', {
+    const response = await twitter.api.get('statuses/show', {
       id: '1019171288533749761', // a retweet by @dandv of @naval
       tweet_mode: 'extended'
     });
@@ -257,14 +257,14 @@ describe('misc', () => {
   });
 
   it('should have favorited at least one tweet ever', async () => {
-    const response = await twitter.client.get('favorites/list');
+    const response = await twitter.api.get('favorites/list');
     expect(response[0]).toHaveProperty('id_str');
   });
 
   it('should fail to follow unspecified user', async () => {
     expect.assertions(1);
     try {
-      await twitter.client.post('friendships/create');
+      await twitter.api.post('friendships/create');
     } catch (e) {
       expect(e).toMatchObject({
         errors: [{ code: 108, message: 'Cannot find specified user.' }]
@@ -273,7 +273,7 @@ describe('misc', () => {
   });
 
   it('should follow user', async () => {
-    const response = await twitter.client.post('friendships/create', {
+    const response = await twitter.api.post('friendships/create', {
       screen_name: 'mdo'
     });
     expect(response).toMatchObject({
@@ -282,7 +282,7 @@ describe('misc', () => {
   });
 
   it('should unfollow user', async () => {
-    const response = await twitter.client.post('friendships/destroy', {
+    const response = await twitter.api.post('friendships/destroy', {
       user_id: '15008676'
     });
     expect(response).toMatchObject({
@@ -294,13 +294,13 @@ describe('misc', () => {
     const userIds = [...Array(99).fill('928759224599040001'), '711030662728437760'].join(',');
     const expectedIds = [{ id_str: '928759224599040001' }, { id_str: '711030662728437760' }];
     // Use POST per https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
-    const usersPost = await twitter.client.post('users/lookup', {
+    const usersPost = await twitter.api.post('users/lookup', {
       user_id: userIds
     });
     delete usersPost._headers; // to not confuse Jest - https://github.com/facebook/jest/issues/5998#issuecomment-446827454
     expect(usersPost).toMatchObject(expectedIds);
     // Check if GET worked the same
-    const usersGet = await twitter.client.get('users/lookup', { user_id: userIds });
+    const usersGet = await twitter.api.get('users/lookup', { user_id: userIds });
     expect(usersGet.map((u: any) => u)).toMatchObject(expectedIds); // map(u => u) is an alternative to deleting _headers
   });
 
@@ -308,7 +308,7 @@ describe('misc', () => {
     const nonexistentScreenName = randomString() + randomString();
     try {
       // https://twitter.com/fuckyou is actually a suspended user, but the API doesn't differentiate from nonexistent users
-      await twitter.client.get('users/lookup', {
+      await twitter.api.get('users/lookup', {
         screen_name: `fuckyou,${nonexistentScreenName}`
       });
     } catch (e) {
@@ -319,7 +319,7 @@ describe('misc', () => {
   });
 
   it('should get timeline', async () => {
-    const response = await twitter.client.get('statuses/user_timeline', {
+    const response = await twitter.api.get('statuses/user_timeline', {
       screen_name: 'twitterapi',
       count: 2
     });

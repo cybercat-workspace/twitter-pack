@@ -2,11 +2,11 @@ import { OAuth } from './oauth-1.0a';
 import { DEFAULT_TWITTER_SUBDOMAIN, DEFAULT_TWITTER_VERSION } from './constants';
 import { TwitterOptions } from './twitter.typings';
 import { TwitterAuth } from './twitter-auth';
-import { TwitterClient } from './twitter-client';
+import { TwitterApi } from './twitter-api';
 
 export class Twitter {
   readonly auth: TwitterAuth;
-  readonly client: TwitterClient;
+  readonly api: TwitterApi;
 
   constructor(options: TwitterOptions) {
     const {
@@ -26,7 +26,7 @@ export class Twitter {
     });
 
     this.auth = new TwitterAuth({ oauth, subdomain });
-    this.client = new TwitterClient({
+    this.api = new TwitterApi({
       oauth,
       subdomain,
       version,
